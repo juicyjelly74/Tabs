@@ -1,18 +1,20 @@
 import * as React from 'react';
+import { connect } from 'react-redux';
 import * as TabStore from '../reducers/Tab';
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
-import { MAX_TEXT_LENGTH } from '../constants';
-
+import { MAX_TEXT_LENGTH, GET_TEXT_API_URL } from '../constants';
 
 type TabProps = TabStore.TabProps & typeof TabStore.actionCreators;
 
-export class Tab extends React.PureComponent<TabProps, TabStore.TabState> {
-    public state = { tabText: undefined, isDisabled: false };
-
+class Tab extends React.PureComponent<TabProps, {}> {
+    public state = { tabText: this.props.text, isDisabled: this.isButtonDisabled(this.props.text) };
+    
     constructor(props: Readonly<TabProps>) {
         super(props);
+
         this.handleChange = this.handleChange.bind(this);
         this.updateText = this.updateText.bind(this);
+        this.getRandomText = this.getRandomText.bind(this);
         this.isButtonDisabled = this.isButtonDisabled.bind(this);
     }
 
@@ -33,15 +35,12 @@ export class Tab extends React.PureComponent<TabProps, TabStore.TabState> {
         return text !== undefined ? text.length : 0;
     }
 
-    public componentDidUpdate(prevProps: Readonly<TabProps>) {
-        if (this.props.tabText && prevProps.tabText !== this.props.tabText) {
-            this.updateText(this.props.tabText);
-        }
-    }
-
-    public componentDidMount() {
-        const text = this.props.text ? this.props.text : this.state.tabText;
-        this.updateText(text);
+    getRandomText() {
+        fetch(GET_TEXT_API_URL)
+            .then(response => response.json() as Promise<TabStore.RandomText>)
+            .then(data => {
+                this.updateText(data.text[0]);
+            });
     }
 
     public render() {
@@ -60,9 +59,9 @@ export class Tab extends React.PureComponent<TabProps, TabStore.TabState> {
                     </FormGroup>
 
                     <FormGroup>
-                        <Button onClick={() => { this.props.getRandomText(); }}>Generate text</Button>{' '}
+                        <Button onClick={() => { this.getRandomText(); }}>Generate text</Button>{' '}
                         <Button disabled={this.state.isDisabled}
-                            onClick={() => { this.props.changeCallback(this.state.tabText); }} color="primary">Send</Button>
+                            onClick={() => { this.props.changeSharedText(this.state.tabText); }} color="primary">Send</Button>
                     </FormGroup>
                 </Form>
             </React.Fragment>
@@ -70,6 +69,11 @@ export class Tab extends React.PureComponent<TabProps, TabStore.TabState> {
     }
 };
 
-export const mapActionsToProps = (dispatch: any) => ({
-    getRandomText: () => dispatch(TabStore.actionCreators.getRandomText())
+const mapActionsToProps = (dispatch: any) => ({
+    changeSharedText: (text: string | undefined) => dispatch(TabStore.actionCreators.changeSharedText(text))
 });
+
+export default connect(
+    null,
+    mapActionsToProps
+)(Tab);
