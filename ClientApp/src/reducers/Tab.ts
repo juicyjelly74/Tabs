@@ -4,11 +4,11 @@ import { KnownAction, ChangeSharedTextAction } from '../actions';
 
 export interface TabProps {
     id: string;
-    text: string | undefined;
+    text?: string | undefined;
 }
 
 export interface TabState {
-    tabText: string | undefined;
+    text: string | undefined;
     isDisabled: boolean;
 }
 

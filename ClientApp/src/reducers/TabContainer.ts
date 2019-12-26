@@ -2,10 +2,6 @@ import { Action, Reducer } from 'redux';
 import { CHANGE_SHARED_TEXT_ACTION } from '../constants';
 import { KnownAction, ChangeSharedTextAction } from '../actions';
 
-export interface TabContainerProps {
-    text: string | undefined;
-}
-
 export interface TabContainerState {
     text: string | undefined;
 }

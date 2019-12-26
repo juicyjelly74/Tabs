@@ -3,14 +3,16 @@ import { connect } from 'react-redux';
 import * as TabStore from '../reducers/Tab';
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 import { MAX_TEXT_LENGTH, GET_TEXT_API_URL } from '../constants';
+import { ApplicationState } from '../store';
 
 type TabProps = TabStore.TabProps & typeof TabStore.actionCreators;
 
-class Tab extends React.PureComponent<TabProps, {}> {
-    public state = { tabText: this.props.text, isDisabled: this.isButtonDisabled(this.props.text) };
-    
+class Tab extends React.PureComponent<TabProps, TabStore.TabState> {
     constructor(props: Readonly<TabProps>) {
         super(props);
+
+        const text = this.props.text ? this.props.text : '';
+        this.state = { text: text, isDisabled: this.isButtonDisabled(text) };
 
         this.handleChange = this.handleChange.bind(this);
         this.updateText = this.updateText.bind(this);
@@ -19,7 +21,7 @@ class Tab extends React.PureComponent<TabProps, {}> {
     }
 
     updateText(text: string | undefined) {
-        this.setState({ ...this.state, tabText: text, isDisabled: this.isButtonDisabled(text) });
+        this.setState({ ...this.state, text: text, isDisabled: this.isButtonDisabled(text) });
     }
 
     isButtonDisabled(text: string | undefined) {
@@ -51,17 +53,18 @@ class Tab extends React.PureComponent<TabProps, {}> {
                 <Form>
                     <FormGroup>
                         <Label for="text">Enter text</Label>
-                        <Input type="text" name="text" id="text" placeholder="Enter text" defaultValue={this.state.tabText} onChange={this.handleChange}/>
+                        <Input type="text" name="text" id="text" placeholder="Enter text" value={this.state.text} onChange={this.handleChange}/>
                     </FormGroup>
+
                     <FormGroup>
                         <Label for="length">Length</Label>
-                        <Input type="number" name="length" id="length" value={this.getCurrentTextLength(this.state.tabText)} disabled/>
+                        <Input type="number" name="length" id="length" value={this.getCurrentTextLength(this.state.text)} disabled/>
                     </FormGroup>
 
                     <FormGroup>
                         <Button onClick={() => { this.getRandomText(); }}>Generate text</Button>{' '}
                         <Button disabled={this.state.isDisabled}
-                            onClick={() => { this.props.changeSharedText(this.state.tabText); }} color="primary">Send</Button>
+                            onClick={() => { this.props.changeSharedText(this.state.text); }} color="primary">Send</Button>
                     </FormGroup>
                 </Form>
             </React.Fragment>
@@ -74,6 +77,6 @@ const mapActionsToProps = (dispatch: any) => ({
 });
 
 export default connect(
-    null,
+    (state: ApplicationState) => ({ text: state.tabContainer ? state.tabContainer.text : undefined }),
     mapActionsToProps
 )(Tab);
