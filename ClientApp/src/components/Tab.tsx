@@ -15,9 +15,7 @@ class Tab extends React.PureComponent<TabProps, TabStore.TabState> {
         this.state = { text: text, isDisabled: this.isButtonDisabled(text) };
 
         this.handleChange = this.handleChange.bind(this);
-        this.updateText = this.updateText.bind(this);
         this.getRandomText = this.getRandomText.bind(this);
-        this.isButtonDisabled = this.isButtonDisabled.bind(this);
     }
 
     updateText(text: string | undefined) {
